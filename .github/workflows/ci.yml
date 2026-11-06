@@ -1,0 +1,35 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  schedule:
+    - cron: "17 4 * * 1"
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          global-json-file: global.json
+          cache: true
+          cache-dependency-path: SSHMonitor.csproj
+      - run: dotnet restore
+      - run: dotnet build --configuration Release --no-restore --warnaserror
+      - run: dotnet list package --vulnerable --include-transitive
+      - name: Show outdated dependencies
+        run: dotnet list package --outdated --include-transitive
+      - name: Check for newer .NET SDK and runtime patches
+        run: dotnet sdk check
+      - name: Verify pinned SDK
+        shell: pwsh
+        run: |
+          $expected = (Get-Content global.json | ConvertFrom-Json).sdk.version
+          $actual = dotnet --version
+          if ($actual -ne $expected) { throw "Expected .NET SDK $expected, but setup resolved $actual" }

@@ -1,0 +1,12 @@
+bin/
+obj/
+.vs/
+*.user
+*.suo
+*.pfx
+*.pem
+*.key
+appsettings.Local.json
+artifacts/
+.packages/
+.dotnet-home/

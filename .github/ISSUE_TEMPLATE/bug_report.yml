@@ -1,0 +1,41 @@
+name: Bug report
+description: Report a reproducible problem in SSH Monitor
+title: "[Bug]: "
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: Never include passwords, private keys, public IP addresses, or unredacted server logs.
+  - type: input
+    id: version
+    attributes:
+      label: Version
+      placeholder: v0.1.0
+    validations:
+      required: true
+  - type: dropdown
+    id: distro
+    attributes:
+      label: Server distribution
+      options: [Alpine Linux, Debian, Ubuntu, Fedora, Rocky Linux, Other]
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      description: Redact addresses, usernames, paths, and logs before posting.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behavior
+    validations:
+      required: true
