@@ -19,12 +19,13 @@ jobs:
         with:
           global-json-file: global.json
           cache: true
-          cache-dependency-path: SSHMonitor.csproj
-      - run: dotnet restore
-      - run: dotnet build --configuration Release --no-restore --warnaserror
-      - run: dotnet list package --vulnerable --include-transitive
+          cache-dependency-path: "**/*.csproj"
+      - run: dotnet restore SSHMonitor.sln
+      - run: dotnet build SSHMonitor.sln --configuration Release --no-restore --warnaserror
+      - run: dotnet test SSHMonitor.sln --configuration Release --no-build --warnaserror
+      - run: dotnet list SSHMonitor.sln package --vulnerable --include-transitive
       - name: Show outdated dependencies
-        run: dotnet list package --outdated --include-transitive
+        run: dotnet list SSHMonitor.sln package --outdated --include-transitive
       - name: Check for newer .NET SDK and runtime patches
         run: dotnet sdk check
       - name: Verify pinned SDK
