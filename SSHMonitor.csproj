@@ -24,5 +24,8 @@
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="8.0.1" />
     <PackageReference Include="Microsoft.Extensions.Options.DataAnnotations" Version="8.0.0" />
   </ItemGroup>
+  <ItemGroup>
+    <Compile Remove="SSHMonitor.Tests/**/*.cs" />
+  </ItemGroup>
   <ItemGroup><None Update="appsettings.json"><CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory></None></ItemGroup>
 </Project>

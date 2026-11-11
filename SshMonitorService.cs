@@ -29,7 +29,7 @@ public sealed class SshServerMonitor : IServerMonitor
     public Task<ServerSnapshot> CollectAsync(ServerProfile profile, CancellationToken cancellationToken = default) => Task.Run(() =>
     {
         if (_client is not { IsConnected: true }) throw new InvalidOperationException("Not connected.");
-        var checks = string.Join("\n", profile.Checks.Select((c, i) => BuildCheck(c, i)));
+        var checks = string.Join("\n", profile.Checks.Select(RemoteCommandBuilder.BuildCheck));
         var script = $$"""
             hostname=$(hostname 2>/dev/null || echo unknown)
             os=$(sed -n 's/^PRETTY_NAME=//p' /etc/os-release 2>/dev/null | tr -d '"' | head -1)
@@ -76,27 +76,11 @@ public sealed class SshServerMonitor : IServerMonitor
         return result;
     }
 
-    private static string BuildCheck(ServiceCheck c, int i)
-    {
-        var target = Shell(c.Target); var name = Shell(c.Name);
-        var test = c.Type switch
-        {
-            CheckType.Service => $"(systemctl is-active --quiet {target} 2>/dev/null || rc-service {target} status >/dev/null 2>&1)",
-            CheckType.Http => $"(curl -fsS --max-time 4 {target} >/dev/null 2>&1 || wget -q -T 4 -O /dev/null {target})",
-            CheckType.Tcp => $"((if command -v ss >/dev/null 2>&1; then ss -lnt; elif command -v netstat >/dev/null 2>&1; then netstat -lnt; else exit 1; fi) 2>/dev/null | awk '{{print $4}}' | grep -Eq ':{target}$')",
-            CheckType.Process => $"pgrep -f -- {target} >/dev/null 2>&1",
-            CheckType.Docker => $"[ \"$(docker inspect -f '{{{{.State.Running}}}}' {target} 2>/dev/null)\" = true ]",
-            _ => "false"
-        };
-        return $"if {test}; then printf '@@CHECK|%s|UP|%s\\n' '{i}' {name}; else printf '@@CHECK|%s|DOWN|%s\\n' '{i}' {name}; fi";
-    }
-
     private static CheckResult ParseCheck(string line)
     {
         var p = line.Split('|');
         return new(p.ElementAtOrDefault(3) ?? "Check", p.ElementAtOrDefault(2) == "UP", p.ElementAtOrDefault(2) ?? "UNKNOWN");
     }
-    private static string Shell(string value) => "'" + value.Replace("'", "'\\''") + "'";
     private static long ParseLong(string? value) => long.TryParse(value, out var n) ? n : 0;
     private static string FormatUptime(string? value) { var t = TimeSpan.FromSeconds(ParseLong(value)); return $"{(int)t.TotalDays}d {t.Hours}h {t.Minutes}m"; }
     public void Dispose() { _client?.Dispose(); _client = null; }
