@@ -79,8 +79,8 @@ public partial class MainWindow : Window
         DiskBar.Value = disk.Length == 3 && double.TryParse(disk[2].TrimEnd('%'), out var pct) ? pct : 0;
         ChecksList.Items.Clear();
         foreach (var c in s.Checks) ChecksList.Items.Add(new TextBlock { Text = $"{(c.Ok ? "●" : "●")}  {c.Name}     {c.Detail}", Foreground = Brush(c.Ok ? "#3FB950" : "#F85149"), FontSize = 15, Margin = new Thickness(4, 8, 4, 8) });
-        ConnectionsText.Text = s.Connections.Count > 0 ? string.Join(Environment.NewLine, s.Connections) : Texts.Get(_profile.Language, "NoConnections");
-        SecurityText.Text = s.SecurityEvents.Count > 0 ? string.Join(Environment.NewLine, s.SecurityEvents) : Texts.Get(_profile.Language, "NoSecurity");
+        ConnectionsText.Text = string.Join(Environment.NewLine, s.Connections);
+        SecurityText.Text = string.Join(Environment.NewLine, s.SecurityEvents);
         FooterText.Text = $"Updated {s.CollectedAt:HH:mm:ss}  •  refresh every {_profile.RefreshSeconds}s  •  SSH encrypted";
     }
 
